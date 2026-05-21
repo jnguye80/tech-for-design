@@ -60,6 +60,25 @@ const AnimatedAsciiTulip = () => {
     }
   };
 
+  const heartTemplate = [
+    [0, 1, 0, 1, 0],
+    [1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 0],
+    [0, 0, 1, 0, 0],
+  ];
+
+  const drawHeart = (grid, cx, cy, frame, phase) => {
+    const beat = (Math.sin(frame * 0.06 + phase) + 1) / 2;
+    const char = beat > 0.45 ? '♥' : '♡';
+    for (let dy = 0; dy < heartTemplate.length; dy++) {
+      for (let dx = 0; dx < heartTemplate[dy].length; dx++) {
+        if (heartTemplate[dy][dx]) {
+          setCell(grid, cx + dx - 2, cy + dy, char);
+        }
+      }
+    }
+  };
+
   const drawTulip = (grid, frame) => {
     // A slow sway and a slower breath — the flower listens to its own rhythm
     const sway = Math.sin(frame * 0.012) * 1.4;
@@ -153,6 +172,12 @@ const AnimatedAsciiTulip = () => {
         }
       }
     }
+
+    // Four hearts at the corners, each beating with its own phase
+    drawHeart(grid, 8,  3,  frame, 0);
+    drawHeart(grid, 72, 3,  frame, Math.PI / 2);
+    drawHeart(grid, 8,  39, frame, Math.PI);
+    drawHeart(grid, 72, 39, frame, 3 * Math.PI / 2);
   };
 
   const getCharForIntensity = (intensity, boost = false) => {
@@ -194,14 +219,17 @@ const AnimatedAsciiTulip = () => {
                 case '·': opacity = 0.5; break;
                 case '.': opacity = 0.4; break;
                 case '|': opacity = 0.55; break;
+                case '♥': opacity = 0.92; break;
+                case '♡': opacity = 0.6; break;
                 case ' ': opacity = 0; break;
               }
+              const rgb = (char === '♥' || char === '♡') ? '190, 70, 90' : '50, 50, 50';
 
               return (
                 <span
                   key={j}
                   style={{
-                    color: `rgba(50, 50, 50, ${opacity})`,
+                    color: `rgba(${rgb}, ${opacity})`,
                     display: 'inline-block',
                     width: '0.6em'
                   }}
